@@ -15,12 +15,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+//https://www.jianshu.com/p/6f3a4c6226d3 需要导入
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.composektdemo.ui.theme.ComposeKtDemoTheme
 
@@ -74,14 +74,14 @@ class ListActivity : ComponentActivity() {
 
             // We keep track if the message is expanded or not in this
             // variable
-            var isExpanded = remember { mutableStateOf(false) }
+            var isExpanded by remember { mutableStateOf(false) }
             // surfaceColor will be updated gradually from one color to the other
-            val surfaceColor = animateColorAsState(
-                if (isExpanded.value) MaterialTheme.colors.primary else MaterialTheme.colors.surface,
+            val surfaceColor by animateColorAsState(
+                if (isExpanded) MaterialTheme.colors.primary else MaterialTheme.colors.surface,
             )
 
             // We toggle the isExpanded variable when we click on this Column
-            Column(modifier = Modifier.clickable { isExpanded.value = !isExpanded.value }) {
+            Column(modifier = Modifier.clickable { isExpanded = !isExpanded }) {
                 Text(
                     text = msg.author,
                     color = MaterialTheme.colors.secondaryVariant,
@@ -94,7 +94,7 @@ class ListActivity : ComponentActivity() {
                     shape = MaterialTheme.shapes.medium,
                     elevation = 1.dp,
                     // surfaceColor color will be changing gradually from primary to surface
-                    color = surfaceColor.value,
+                    color = surfaceColor,
                     // animateContentSize will change the Surface size gradually
                     modifier = Modifier
                         .animateContentSize()
@@ -105,10 +105,30 @@ class ListActivity : ComponentActivity() {
                         modifier = Modifier.padding(all = 4.dp),
                         // If the message is expanded, we display all its content
                         // otherwise we only display the first line
-                        maxLines = if (isExpanded.value) Int.MAX_VALUE else 1,
+                        maxLines = if (isExpanded) Int.MAX_VALUE else 1,
                         style = MaterialTheme.typography.body2
                     )
                 }
+            }
+        }
+    }
+
+    @Preview(showBackground = true)
+    @Composable
+    fun DefaultPreview() {
+        ComposeKtDemoTheme {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colors.background
+            ) {
+                val mutableList = mutableListOf<Message>()
+                for (i in 0..30) {
+                    mutableList.add(Message().apply {
+                        author = "lurenman ${i}"
+                        body = "this is LazyColumn"
+                    })
+                }
+                Conversation(mutableList)
             }
         }
     }
